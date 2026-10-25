@@ -1,0 +1,112 @@
+{
+  "version": 1,
+  "items": {
+    "repo": [
+      {
+        "id": "metacubex",
+        "name": "MetaCubeX meta-rules-dat",
+        "home": "https://github.com/MetaCubeX/meta-rules-dat",
+        "clash": "",
+        "mihomo": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo",
+        "singbox": "https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/sing/geo",
+        "note": "官方 geosite / geoip，mihomo 用 .mrs、sing-box 用 .srs；规则名形如 geosite/netflix。",
+        "builtin": true
+      }
+    ],
+    "ruleset": [
+      {
+        "id": "private-lan",
+        "name": "局域网与保留地址",
+        "group": "🎯 全球直连",
+        "desc": "私有网段、回环、链路本地与 .local 域名，全部直连，避免被代理规则误伤。",
+        "behavior": "classical",
+        "urls": {
+          "clash": "",
+          "mihomo": "",
+          "singbox": ""
+        },
+        "inline": [
+          "GEOIP,LAN",
+          "IP-CIDR,10.0.0.0/8,no-resolve",
+          "IP-CIDR,172.16.0.0/12,no-resolve",
+          "IP-CIDR,192.168.0.0/16,no-resolve",
+          "IP-CIDR,127.0.0.0/8,no-resolve",
+          "IP-CIDR,100.64.0.0/10,no-resolve",
+          "IP-CIDR,169.254.0.0/16,no-resolve",
+          "IP-CIDR6,::1/128,no-resolve",
+          "IP-CIDR6,fc00::/7,no-resolve",
+          "IP-CIDR6,fe80::/10,no-resolve",
+          "DOMAIN-SUFFIX,local"
+        ],
+        "builtin": true,
+        "cat": "内网",
+        "tags": [
+          "内网",
+          "局域网",
+          "保留地址",
+          "直连"
+        ]
+      }
+    ],
+    "base": [
+      {
+        "id": "mihomo-standard",
+        "name": "mihomo 标准基础",
+        "format": "mihomo",
+        "desc": "端口、TUN、嗅探、geodata 自动更新等通用设置；不包含 dns / proxies / rules，转换时合并进输出。",
+        "builtin": true,
+        "content": "mixed-port: 7890\nallow-lan: true\nbind-address: '*'\nmode: rule\nlog-level: info\nipv6: false\nunified-delay: true\ntcp-concurrent: true\nglobal-client-fingerprint: chrome\nprofile:\n  store-selected: true\n  store-fake-ip: true\nsniffer:\n  enable: true\n  sniff:\n    HTTP:\n      ports: [80, 8080-8880]\n      override-destination: true\n    TLS:\n      ports: [443, 8443]\n    QUIC:\n      ports: [443, 8443]\n  skip-domain:\n    - Mijia Cloud\n    - +.push.apple.com\ntun:\n  enable: true\n  stack: mixed\n  dns-hijack:\n    - any:53\n  auto-route: true\n  auto-detect-interface: true\ngeodata-mode: true\ngeo-auto-update: true\ngeo-update-interval: 24\n"
+      },
+      {
+        "id": "mihomo-minimal",
+        "name": "mihomo 极简基础",
+        "format": "mihomo",
+        "desc": "只保留端口与日志，适合交给客户端自己管理 TUN。",
+        "builtin": true,
+        "content": "mixed-port: 7890\nallow-lan: true\nmode: rule\nlog-level: info\nipv6: false\n"
+      },
+      {
+        "id": "singbox-standard",
+        "name": "sing-box 标准基础",
+        "format": "singbox",
+        "desc": "TUN 入站、混合入站、clash_api、缓存文件与 NTP；转换时按 JSON 顶层键合并。",
+        "builtin": true,
+        "content": "{\n  \"log\": { \"level\": \"info\", \"timestamp\": true },\n  \"inbounds\": [\n    {\n      \"type\": \"tun\",\n      \"tag\": \"tun-in\",\n      \"address\": [\"172.19.0.1/30\", \"fdfe:dcba:9876::1/126\"],\n      \"auto_route\": true,\n      \"strict_route\": true,\n      \"stack\": \"mixed\",\n      \"sniff\": true\n    },\n    {\n      \"type\": \"mixed\",\n      \"tag\": \"mixed-in\",\n      \"listen\": \"127.0.0.1\",\n      \"listen_port\": 2080\n    }\n  ],\n  \"ntp\": { \"enabled\": true, \"server\": \"time.apple.com\", \"server_port\": 123 },\n  \"experimental\": {\n    \"cache_file\": { \"enabled\": true, \"path\": \"./cache.db\" },\n    \"clash_api\": { \"external_controller\": \"127.0.0.1:9090\" }\n  }\n}\n"
+      },
+      {
+        "id": "singbox-minimal",
+        "name": "sing-box 极简基础",
+        "format": "singbox",
+        "desc": "只设置日志级别，其余交给客户端。",
+        "builtin": true,
+        "content": "{\n  \"log\": { \"level\": \"info\", \"timestamp\": true }\n}\n"
+      }
+    ],
+    "dns": [
+      {
+        "id": "mihomo-fakeip",
+        "name": "mihomo Fake-IP + 国内 DoH",
+        "format": "mihomo",
+        "desc": "Fake-IP 模式，国内域名走阿里/腾讯 DoH，国外域名走 Cloudflare/Google DoH，并给代理节点域名单独解析。",
+        "builtin": true,
+        "content": "dns:\n  enable: true\n  ipv6: false\n  listen: 0.0.0.0:1053\n  enhanced-mode: fake-ip\n  fake-ip-range: 198.18.0.1/16\n  fake-ip-filter:\n    - '*.lan'\n    - '*.local'\n    - '+.msftconnecttest.com'\n    - '+.msftncsi.com'\n    - localhost.ptlogin2.qq.com\n  default-nameserver:\n    - 223.5.5.5\n    - 119.29.29.29\n  nameserver:\n    - https://doh.pub/dns-query\n    - https://dns.alidns.com/dns-query\n  proxy-server-nameserver:\n    - https://doh.pub/dns-query\n  nameserver-policy:\n    'geosite:cn,private':\n      - https://doh.pub/dns-query\n      - https://dns.alidns.com/dns-query\n    'geosite:geolocation-!cn':\n      - https://1.1.1.1/dns-query\n      - https://dns.google/dns-query\n"
+      },
+      {
+        "id": "mihomo-redir",
+        "name": "mihomo Redir-Host + 加密 DNS",
+        "format": "mihomo",
+        "desc": "不劫持 DNS 的模式，适合路由器/旁路由已有 DNS 服务的场景。",
+        "builtin": true,
+        "content": "dns:\n  enable: true\n  ipv6: false\n  enhanced-mode: redir-host\n  default-nameserver:\n    - 223.5.5.5\n    - 119.29.29.29\n  nameserver:\n    - https://doh.pub/dns-query\n    - https://dns.alidns.com/dns-query\n  fallback:\n    - https://1.1.1.1/dns-query\n    - https://dns.google/dns-query\n  fallback-filter:\n    geoip: true\n    geoip-code: CN\n    ipcidr:\n      - 240.0.0.0/4\n"
+      },
+      {
+        "id": "singbox-dns",
+        "name": "sing-box 分流 DNS",
+        "format": "singbox",
+        "desc": "国内域名走阿里 DoH，其余走 Cloudflare DoH；不含 detour，避免依赖模板里的出站组名。",
+        "builtin": true,
+        "content": "{\n  \"dns\": {\n    \"servers\": [\n      { \"tag\": \"dns_cn\", \"address\": \"https://dns.alidns.com/dns-query\" },\n      { \"tag\": \"dns_remote\", \"address\": \"https://1.1.1.1/dns-query\" }\n    ],\n    \"rules\": [\n      { \"domain_suffix\": [\".lan\", \".local\", \".cn\"], \"server\": \"dns_cn\" }\n    ],\n    \"final\": \"dns_remote\"\n  }\n}\n"
+      }
+    ]
+  }
+}

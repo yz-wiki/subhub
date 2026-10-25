@@ -1,0 +1,28 @@
+# 依赖与构建产物
+node_modules/
+web/node_modules/
+web/dist/
+gateway/web/
+dist/
+*.log
+
+# 运行时数据（compose 默认挂载到 ./data）
+data/
+config/
+
+# 本地环境
+.env
+.env.local
+*.local
+
+# 编辑器 / 系统
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# 临时文件
+tmp/
+*.tmp
+*.bak

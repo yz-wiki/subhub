@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "icons": [
+    {
+      "id": "example-cn",
+      "name": "示例 · 中国",
+      "category": "示例",
+      "value": "🇨🇳",
+      "kind": "emoji"
+    }
+  ]
+}

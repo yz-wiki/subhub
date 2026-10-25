@@ -1,0 +1,81 @@
+name: subhub
+
+# 完整链路：SubHub 网关 + subconverter 转换引擎。
+# subconverter 只在内部网络可达，对外只暴露网关。
+
+x-log: &log
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+services:
+  subconverter:
+    image: ${SUBCONVERTER_IMAGE:-asdlokj1qpi23/subconverter:latest}
+    restart: unless-stopped
+    <<: *log
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+    expose:
+      - "25500"
+    volumes:
+      - ./data/subconverter:/base/cache
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:25500/version >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - subhub
+
+  gateway:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+      args:
+        NPM_REGISTRY: ${NPM_REGISTRY:-https://registry.npmjs.org}
+    image: ${SUBHUB_IMAGE:-subhub/subhub:latest}
+    restart: unless-stopped
+    <<: *log
+    depends_on:
+      subconverter:
+        condition: service_healthy
+    ports:
+      - "${GATEWAY_PORT:-8080}:8080"
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+      PORT: "8080"
+      CONFIG_DIR: /config
+      CONFIG_HOST_ROOT: ${CONFIG_HOST_ROOT:-./data}
+      SUBCONVERTER: http://subconverter:25500
+      SELF_URL: http://gateway:8080
+      PUBLIC_BASE: ${PUBLIC_BASE:-}
+      ADMIN_KEY: ${ADMIN_KEY:-}
+      CACHE_TTL: ${CACHE_TTL:-300}
+      ENGINE_TIMEOUT: ${ENGINE_TIMEOUT:-120000}
+      ALLOW_PRIVATE_SOURCES: ${ALLOW_PRIVATE_SOURCES:-false}
+      TRUST_PROXY: ${TRUST_PROXY:-false}
+      RATE_CONVERT: ${RATE_CONVERT:-30}
+      RATE_SUBSCRIBE: ${RATE_SUBSCRIBE:-120}
+      SUBHUB_BASE_PATH: ${SUBHUB_BASE_PATH:-}
+    volumes:
+      - ./data/rules:/config/rules
+      - ./data/icons:/config/icons
+      - ./data/templates:/config/templates
+      - ./data/cache:/config/cache
+      - ./data/state:/config/state
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/api/health >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - subhub
+
+networks:
+  subhub:
+    driver: bridge
+

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>SubHub · 订阅转换</title>
+  <meta name="description" content="一个链接，同时服务 mihomo / sing-box / daed / Surge / Loon / Quantumult X。">
+  <meta name="theme-color" content="#070a11">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">S</div>
+        <div class="brand-text">
+          <div class="brand-name">SubHub</div>
+          <div class="brand-sub">Sub Converter</div>
+        </div>
+      </div>
+
+      <nav class="nav" id="nav">
+        <button class="nav-item" data-view="convert"><span class="ico">⇄</span>订阅转换</button>
+        <button class="nav-item" data-view="library"><span class="ico">▤</span>资源库</button>
+        <button class="nav-item" data-view="profiles"><span class="ico">◈</span>订阅</button>
+        <button class="nav-item" data-view="system"><span class="ico">◎</span>系统</button>
+      </nav>
+
+      <div class="top-actions">
+        <select class="select tiny" id="theme-select" title="界面主题">
+          <option value="dark">深色</option>
+          <option value="light">浅色</option>
+        </select>
+        <span class="engine-pill" id="engine-pill" title="转换引擎状态">
+          <span class="dot" id="engine-dot"></span><span id="engine-text">引擎检测中…</span>
+        </span>
+        <button class="btn ghost small" id="account-btn" title="账号与登录">
+          <span class="avatar" id="account-avatar">访</span><span id="account-label">登录</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="page-head">
+        <h1 id="page-title">订阅转换</h1>
+        <p id="page-sub">粘贴上游订阅或节点，选择客户端，实时预览生成结果。</p>
+      </div>
+      <section class="view" id="view"></section>
+    </main>
+  </div>
+
+  <div id="toasts"></div>
+  <div id="modal-root"></div>
+
+  <script src="/vendor/qrcode.js"></script>
+  <script src="/vendor/jsQR.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
