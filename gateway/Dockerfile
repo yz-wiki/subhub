@@ -5,7 +5,7 @@
 # ─────────────────────────────────────────────────────────────
 
 # 前端构建阶段
-FROM node:22-alpine AS web
+FROM --platform=$BUILDPLATFORM node:22-alpine AS web
 
 ENV NODE_OPTIONS=--max-old-space-size=1024
 
