@@ -7,8 +7,8 @@ dist/
 *.log
 
 # 运行时数据（compose 默认挂载到 ./data）
-data/
-config/
+/data/
+/config/
 
 # 本地环境
 .env
@@ -26,3 +26,4 @@ Thumbs.db
 tmp/
 *.tmp
 *.bak
+

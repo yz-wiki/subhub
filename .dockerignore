@@ -1,8 +1,8 @@
 .git
 .gitignore
 .github
-data
-config
+/data
+/config
 node_modules
 web/node_modules
 web/dist
@@ -18,3 +18,4 @@ Thumbs.db
 .idea
 .vscode
 tmp
+
